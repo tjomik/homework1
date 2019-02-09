@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+
+    <script>
+        var data;
+        var follow;
+        var flw_btn;
+        function callbackf(json_data){
+            data = JSON.parse(json_data)
+            }
+        function follow_f(json_data){
+                follow = JSON.parse(json_data)
+                }
+        function follow_func() {
+            flw_btn = document.createElement('button');
+            flw_btn.id = 'follow_button';
+            var flw_btn_div = document.getElementById('follow_button_div');
+            flw_btn.onclick = follow_post;
+            $.ajax({
+            method: 'GET',
+            url: '../../../follow/{{ username }}',
+            dataType: 'json',
+            success: follow_f
+        }).always(function() {
+
+        if (follow === true){
+            flw_btn.innerHTML = 'Unfollow'
+        }
+        else{
+            flw_btn.innerHTML = 'Follow'
+        }
+            flw_btn_div.appendChild(flw_btn);
+        }
+        );
+        }
+
+        function follow_post (){
+         $.ajax({
+            method: 'POST',
+            url: '../../../follow/{{ username }}',
+            data: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+        });
+             if (flw_btn.innerHTML === 'Follow'){
+                 flw_btn.innerHTML = 'Unfollow'
+             }
+             else{
+                 flw_btn.innerHTML = 'Follow'
+
+             }
+        }
+
+        function display(){
+            follow_func();
+            $.ajax({
+            url: '../../../api/account/' + "{{ username }}",
+            dataType: 'json',
+            success: callbackf
+            }).always(function () {
+                data.forEach(function (element) {
+                var obj = new Image();
+                obj.src = "../../static/media/" + element.fields.img;
+                var a =  document.createElement("div");
+                a.className=element.pk;
+                a.appendChild(obj);
+                document.getElementById("output").appendChild(a);
+                console.log(element.fields);
+            });
+            });
+
+            //document.getElementById('output').appendChild(data[i]) = data;
+            //console.log(data[0].fields);
+        }
+
+    </script>
+    <style>
+        img{
+    padding: 5px;
+    height: 100px;
+    width: 100px;
+}
+    </style>
+
+</head>
+<body onload="display()">
+
+<div id="follow_button_div"></div>
+<div id="output"></div>
+</body>
+</html>

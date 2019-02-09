@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+{% for post in post_list %}
+    <div>{{ post.user.username }}</div>
+<div><img height="500" width="500" src={{ post.img.url }}></div>
+{% for comment in comment_list %}
+    {% if comment.post == post %}
+    <div>{{ comment.user.username }} : {{ comment.c_text }}</div>
+    {% endif %}
+{% endfor %}
+{% endfor %}
+
+
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script>
+        //function f() {
+        //var x = document.createElement("INPUT");
+        //x.setAttribute("type", "file");
+        //x.id ='image';
+        //document.getElementById('aa').appendChild(x);
+        //}
+                function button_subm() {
+            var input = document.getElementsByName('img');
+
+            var file = input[0].files[0];
+            console.log(file);
+            var form = new FormData();
+            form.append('img', file);
+            form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            form.id = 'form';
+            form.enctype='multipart/form-data';
+
+            $.ajax({
+                type: 'POST',
+                data: form,
+                url: 'http://127.0.0.1/newpost/',
+                contentType: false,
+                processData: false,
+                cache: false,
+            });
+        }
+        function form_show() {
+            $('#modal').modal('show');
+
+        }
+    </script>
+</head>
+<body>
+
+<button onclick="form_show()">Show</button>
+
+<div class="modal" id="modal" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Сделать публикацию</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+          <input type="file" name="img" accept="image/png, image/jpeg, image/jpg">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="button_subm()">Подтвердить</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>{% csrf_token %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>

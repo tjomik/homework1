@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script>
+        var data;
+        var i = 1;
+        var like = 0;
+        var who_liked = [];
+        var username;
+        function callbackf(json_data){
+            data = JSON.parse(json_data)
+            }
+
+        function callbackf1(json_data){
+            like = JSON.parse(json_data)
+            }
+        function callbackf2(json_data){
+            who_liked = JSON.parse(json_data)
+            }
+        function callbackf3(json_data) {
+        username = json_data
+        }
+
+            function add_pic(){
+                 $.ajax({
+            url: 'http://127.0.0.1/api/feed/?page='+ i,
+            dataType: 'json',
+            success: callbackf
+            }).always(function (){data.forEach(function (element) {
+                        $.ajax({
+                             url: 'http://127.0.0.1/getusername/'+ element.fields.user,
+                             dataType: 'text',
+                             success: callbackf3
+                         }).always(function () {
+
+
+                         var obj = new Image();
+                         obj.src = "../../static/media/" + element.fields.img;
+                         var a = document.createElement("div");
+                         var username_el = document.createElement('a');
+                         username_el.href = "http://127.0.0.1/account/" + username;
+                         username_el.text = username;
+                         var username_div = document.createElement("div");
+                         username_div.appendChild(username_el);
+                         a.appendChild(username_div);
+                         a.appendChild(obj);
+                         document.getElementById("output").appendChild(a);
+                         $.ajax({
+                             url: 'http://127.0.0.1/like/'+ element.pk,
+                             dataType: 'json',
+                             success: callbackf1
+                         }).always(function () {
+
+
+                             var display_like = document.createElement("button");
+                             var button_div = document.createElement("DIV");
+                             button_div.id = "button_div "+element.pk;
+                             display_like.id = element.pk;
+                             display_like.onclick = function () {
+                                 $.ajax({
+                                     type: 'POST',
+                                     url: 'http://127.0.0.1/like/'+ element.pk,
+                                     data: {'csrfmiddlewaretoken':'{{ csrf_token }}'}
+                                    });
+
+                               if (display_like.innerHTML === "Like") {
+
+                                 display_like.innerHTML = "No Like";
+                             }
+                             else {
+                                 display_like.innerHTML = "Like";
+                             }
+                             };
+                             if (like === 0) {
+
+                                 display_like.innerHTML = "Like";
+                             }
+                             else {
+                                 display_like.innerHTML = "No Like";
+                             }
+                             button_div.appendChild(display_like);
+                             a.appendChild(button_div);
+                             like = 0;
+
+                         }).always(function(){
+                             var button_div = document.getElementById("button_div "+element.pk);
+                             var who_liked_btn = document.createElement("button");
+                             who_liked_btn.innerHTML = 'Who liked?';
+                             button_div.appendChild(who_liked_btn);
+                             var who_liked_div = document.createElement("DIV");
+
+                             a.appendChild(who_liked_div);
+                             who_liked_div.id = 'who_liked ' + element.pk;
+
+
+                             who_liked_btn.onclick = function() {
+                                 $.ajax({
+                                     type: 'GET',
+                                     url: 'http://127.0.0.1/wholiked/'+ element.pk,
+                                     success: callbackf2
+                                    }).always(function () {
+                                    var who_liked_div = document.getElementById('who_liked ' + element.pk);
+                                    if (who_liked.length === 0)
+                                    {
+                                        who_liked_div.innerHTML = 'No one yet';
+                                    }
+                                    else
+                                        {
+                                            var str = '';
+                                            for(var n=0; n<who_liked.length; n++) {
+
+                                                str = str + who_liked[n].username + ' ';
+                                            }
+                                            who_liked_div.innerHTML = str;
+
+                                    }
+                                 })
+
+                             }
+                         })
+            });i = i + 1;
+            })
+            }
+
+                 )}
+                  function button_subm() {
+            var input = document.getElementsByName('img');
+            var file = input[0].files[0];
+            if(file === undefined){
+                var error_msg = document.getElementById('error');
+                error_msg.innerHTML = "Файл не выбран!"
+
+            }
+            else {
+                var form = new FormData();
+                form.append('img', file);
+                form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                form.id = 'form';
+                form.enctype='multipart/form-data';
+
+                $.ajax({
+                    type: 'POST',
+                    data: form,
+                    url: 'http://127.0.0.1/newpost/',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                });
+                window.location.replace("http://127.0.0.1");
+
+            }
+
+        }
+        function form_show() {
+            $('#modal').modal('show');
+
+        }
+    </script>
+    <style>
+        img{
+    padding: 5px;
+    height: 500px;
+    width: 500px;
+}
+    </style>
+</head>
+<body onload="add_pic()">
+<div class="container">
+    <div class="row p-3 bg-primary">
+        <div class="h1 col-md-8">Homework</div>
+        <div class="col-md">
+            <a href="http://127.0.0.1/profile" class="btn btn-success">Profile</a>
+            <button class="btn btn-success" onclick="form_show()">Add post</button>
+            <a href="http://127.0.0.1/logout" class="btn btn-dark">Logout</a>
+        </div>
+
+    </div>
+    <div class="row justify-content-md-center">
+    <div id="output" class="col-md-center"></div>
+    </div>
+    <button onclick="add_pic()">Continue</button>
+</div>
+
+<div class="modal" id="modal" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Сделать публикацию</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+          <input type="file" name="img" accept="image/png, image/jpeg, image/jpg">
+          <div id="error" style="color: red"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="button_subm()">Подтвердить</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>{% csrf_token %}
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

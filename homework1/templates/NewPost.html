@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+        function getCSRFToken() {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            if (cookie.substring(0, 10) == ('csrftoken' + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+        function f() {
+        var x = document.createElement("INPUT");
+        x.setAttribute("type", "file");
+        x.id ='image';
+        document.getElementById('aa').appendChild(x);
+        }
+                function button_subm() {
+            var input = document.getElementById('image');
+            var file = input.files[0];
+            var form = new FormData();
+            form.append('img', file);
+            form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            form.id = 'form';
+            form.enctype='multipart/form-data';
+
+            $.ajax({
+                type: 'POST',
+                data: form,
+                url: 'http://127.0.0.1/newpost/',
+                contentType: false,
+                processData: false,
+                cache: false,
+            });
+        }
+    </script>
+</head>
+<body onload="f()">
+{% csrf_token %}
+<div id='aa'></div>
+<button onclick="button_subm()">Submit</button>
+
+</body>
+</html>
